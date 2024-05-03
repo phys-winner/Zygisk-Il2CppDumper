@@ -108,7 +108,7 @@ std::string dump_method(Il2CppClass *klass) {
             
         auto return_class = il2cpp_class_from_type(return_type);
         outPut << il2cpp_class_get_name(return_class) << " ";
-        outPut << il2cpp_class_get_name(klass) << "-" << il2cpp_class_get_name(method);
+        outPut << il2cpp_class_get_name(klass) << "-" << il2cpp_method_get_name(method);
         outPut << "(";
             
         auto param_count = il2cpp_method_get_param_count(method);
