@@ -139,15 +139,12 @@ std::string dump_method(Il2CppClass *klass) {
         if (param_count > 0) {
             outPut.seekp(-2, outPut.cur);
         }
-
-            // params
-        outPut << ")!0x";
-        outPut << std::hex << (uint64_t) method->methodPointer - il2cpp_base;
-        outPut << "!\n";
-            
         uint32_t iflags = 0;
         auto flags = il2cpp_method_get_flags(method, &iflags);
-        outPut << get_method_modifier(flags) << "\n";
+        
+        outPut << ")!0x";
+        outPut << std::hex << (uint64_t) method->methodPointer - il2cpp_base;
+        outPut << "!" << get_method_modifier(flags) << "\n";
         //TODO GenericInstMethod
     }
     return outPut.str();
@@ -247,10 +244,10 @@ std::string dump_field(Il2CppClass *klass) {
 std::string dump_type(const Il2CppType *type) {
     std::stringstream outPut;
     auto *klass = il2cpp_class_from_type(type);
-    outPut << "\n// Namespace: " << il2cpp_class_get_namespace(klass);
+    //outPut << "\n// Namespace: " << il2cpp_class_get_namespace(klass);
     auto flags = il2cpp_class_get_flags(klass);
     if (flags & TYPE_ATTRIBUTE_SERIALIZABLE) {
-        outPut << "[Serializable]\n";
+        //outPut << "[Serializable]\n";
     }
     //TODO attribute
     auto is_valuetype = il2cpp_class_is_valuetype(klass);
