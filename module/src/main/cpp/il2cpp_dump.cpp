@@ -94,33 +94,23 @@ bool _il2cpp_type_is_byref(const Il2CppType *type) {
 
 std::string dump_method(Il2CppClass *klass) {
     std::stringstream outPut;
-    outPut << "\n\t// Methods\n";
+    //outPut << "\n\t// Methods\n";
     void *iter = nullptr;
     while (auto method = il2cpp_class_get_methods(klass, &iter)) {
         //TODO attribute
-        if (method->methodPointer) {
-            outPut << "\t// RVA: 0x";
-            outPut << std::hex << (uint64_t) method->methodPointer - il2cpp_base;
-            outPut << " VA: 0x";
-            outPut << std::hex << (uint64_t) method->methodPointer;
-        } else {
-            outPut << "\t// RVA: 0x VA: 0x0";
-        }
-        /*if (method->slot != 65535) {
-            outPut << " Slot: " << std::dec << method->slot;
-        }*/
-        outPut << "\n\t";
-        uint32_t iflags = 0;
-        auto flags = il2cpp_method_get_flags(method, &iflags);
-        outPut << get_method_modifier(flags);
+        if (!method->methodPointer) {
+            continue;
         //TODO genericContainerIndex
         auto return_type = il2cpp_method_get_return_type(method);
         if (_il2cpp_type_is_byref(return_type)) {
             outPut << "ref ";
         }
+            
         auto return_class = il2cpp_class_from_type(return_type);
-        outPut << il2cpp_class_get_name(return_class) << " " << il2cpp_method_get_name(method)
-               << "(";
+        outPut << il2cpp_class_get_name(return_class) << " ";
+        outPut << il2cpp_class_get_name(klass) << "-" << il2cpp_class_get_name(method);
+        outPut << "(";
+            
         auto param_count = il2cpp_method_get_param_count(method);
         for (int i = 0; i < param_count; ++i) {
             auto param = il2cpp_method_get_param(method, i);
@@ -149,7 +139,15 @@ std::string dump_method(Il2CppClass *klass) {
         if (param_count > 0) {
             outPut.seekp(-2, outPut.cur);
         }
-        outPut << ") { }\n";
+
+            // params
+        outPut << ")!0x";
+        outPut << std::hex << (uint64_t) method->methodPointer - il2cpp_base;
+        outPut << "!\n";
+            
+        uint32_t iflags = 0;
+        auto flags = il2cpp_method_get_flags(method, &iflags);
+        outPut << get_method_modifier(flags) << "\n";
         //TODO GenericInstMethod
     }
     return outPut.str();
@@ -249,7 +247,7 @@ std::string dump_field(Il2CppClass *klass) {
 std::string dump_type(const Il2CppType *type) {
     std::stringstream outPut;
     auto *klass = il2cpp_class_from_type(type);
-    outPut << "\n// Namespace: " << il2cpp_class_get_namespace(klass) << "\n";
+    outPut << "\n// Namespace: " << il2cpp_class_get_namespace(klass);
     auto flags = il2cpp_class_get_flags(klass);
     if (flags & TYPE_ATTRIBUTE_SERIALIZABLE) {
         outPut << "[Serializable]\n";
@@ -294,7 +292,7 @@ std::string dump_type(const Il2CppType *type) {
     } else {
         outPut << "class ";
     }
-    outPut << il2cpp_class_get_name(klass); //TODO genericContainerIndex
+    //outPut << il2cpp_class_get_name(klass); //TODO genericContainerIndex
     std::vector<std::string> extends;
     auto parent = il2cpp_class_get_parent(klass);
     if (!is_valuetype && !is_enum && parent) {
@@ -313,12 +311,12 @@ std::string dump_type(const Il2CppType *type) {
             outPut << ", " << extends[i];
         }
     }
-    outPut << "\n{";
-    outPut << dump_field(klass);
-    outPut << dump_property(klass);
+    //outPut << "\n{";
+    //outPut << dump_field(klass);
+    //outPut << dump_property(klass);
     outPut << dump_method(klass);
     //TODO EventInfo
-    outPut << "}\n";
+    //outPut << "}\n";
     return outPut.str();
 }
 
@@ -348,11 +346,6 @@ void il2cpp_dump(const char *outDir) {
     size_t size;
     auto domain = il2cpp_domain_get();
     auto assemblies = il2cpp_domain_get_assemblies(domain, &size);
-    std::stringstream imageOutput;
-    for (int i = 0; i < size; ++i) {
-        auto image = il2cpp_assembly_get_image(assemblies[i]);
-        imageOutput << "// Image " << i << ": " << il2cpp_image_get_name(image) << "\n";
-    }
     std::vector<std::string> outPuts;
     if (il2cpp_image_get_class) {
         LOGI("Version greater than 2018.3");
@@ -360,7 +353,8 @@ void il2cpp_dump(const char *outDir) {
         for (int i = 0; i < size; ++i) {
             auto image = il2cpp_assembly_get_image(assemblies[i]);
             std::stringstream imageStr;
-            imageStr << "\n// Dll : " << il2cpp_image_get_name(image);
+            //imageStr << "\n// Dll : " << il2cpp_image_get_name(image);
+            imageStr << "// Image " << i << ": " << il2cpp_image_get_name(image) << "\n";
             auto classCount = il2cpp_image_get_class_count(image);
             for (int j = 0; j < classCount; ++j) {
                 auto klass = il2cpp_image_get_class(image, j);
@@ -417,9 +411,8 @@ void il2cpp_dump(const char *outDir) {
         }
     }
     LOGI("write dump file");
-    auto outPath = std::string(outDir).append("/files/dump.cs");
+    auto outPath = std::string(outDir).append("/files/dump.txt");
     std::ofstream outStream(outPath);
-    outStream << imageOutput.str();
     auto count = outPuts.size();
     for (int i = 0; i < count; ++i) {
         outStream << outPuts[i];
