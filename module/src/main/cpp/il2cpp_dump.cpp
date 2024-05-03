@@ -98,7 +98,7 @@ std::string dump_method(Il2CppClass *klass) {
     void *iter = nullptr;
     while (auto method = il2cpp_class_get_methods(klass, &iter)) {
         //TODO attribute
-        if (!method->methodPointer) {
+        if (!method->methodPointer)
             continue;
         //TODO genericContainerIndex
         auto return_type = il2cpp_method_get_return_type(method);
