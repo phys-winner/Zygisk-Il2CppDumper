@@ -245,6 +245,7 @@ std::string dump_type(const Il2CppType *type) {
     std::stringstream outPut;
     auto *klass = il2cpp_class_from_type(type);
     //outPut << "\n// Namespace: " << il2cpp_class_get_namespace(klass);
+    /*
     auto flags = il2cpp_class_get_flags(klass);
     if (flags & TYPE_ATTRIBUTE_SERIALIZABLE) {
         //outPut << "[Serializable]\n";
@@ -307,7 +308,7 @@ std::string dump_type(const Il2CppType *type) {
         for (int i = 1; i < extends.size(); ++i) {
             outPut << ", " << extends[i];
         }
-    }
+    }*/
     //outPut << "\n{";
     //outPut << dump_field(klass);
     //outPut << dump_property(klass);
@@ -351,7 +352,7 @@ void il2cpp_dump(const char *outDir) {
             auto image = il2cpp_assembly_get_image(assemblies[i]);
             std::stringstream imageStr;
             //imageStr << "\n// Dll : " << il2cpp_image_get_name(image);
-            imageStr << "// Image " << i << ": " << il2cpp_image_get_name(image) << "\n";
+            //imageStr << "// Image " << i << ": " << il2cpp_image_get_name(image) << "\n";
             auto classCount = il2cpp_image_get_class_count(image);
             for (int j = 0; j < classCount; ++j) {
                 auto klass = il2cpp_image_get_class(image, j);
@@ -386,7 +387,7 @@ void il2cpp_dump(const char *outDir) {
             auto image = il2cpp_assembly_get_image(assemblies[i]);
             std::stringstream imageStr;
             auto image_name = il2cpp_image_get_name(image);
-            imageStr << "\n// Dll : " << image_name;
+            //imageStr << "\n// Dll : " << image_name;
             //LOGD("image name : %s", image->name);
             auto imageName = std::string(image_name);
             auto pos = imageName.rfind('.');
